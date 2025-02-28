@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hello AGOL, Write this to the database for me!!</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="" />
+
+  <!-- calls for the ArcGIS API's CSS file and JS library -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.25/"></script>
+
+  <script>
+    require([
+      "esri/config", 
+      "esri/Map", 
+      "esri/views/MapView",
+      "esri/widgets/BasemapGallery",
+      "esri/widgets/Expand",
+      "esri/Basemap",
+      "esri/layers/VectorTileLayer",
+      "esri/layers/TileLayer",
+      "esri/widgets/Locate",
+      "esri/widgets/Search",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Editor",
+      "esri/widgets/Legend"
+    ], function(esriConfig, Map, MapView, BasemapGallery, Expand, Basemap, VectorTileLayer, TileLayer, Locate, Search, Graphic, GraphicsLayer, FeatureLayer, Editor, Legend) {
+      
+      // API Key
+      esriConfig.apiKey = "AAPK2cb19acc98eb406b80346e85af5aa1ffagWp07_WJVQlFAY2XL6xGrQ86USz9K6UzB1OaBd37PTIlYdHTo04S0-F9ETbr-dC";
+      
+      const map = new Map({ 
+        basemap: "arcgis-topographic" // Basemap layer service 
+      }); 
+
+      const view = new MapView({
+        map: map,
+        center: [-88.062317, 44.501308], // Longitude, latitude of Green Bay, WI
+        zoom: 12, // Adjusted zoom level
+        container: "viewDiv"
+      });
+
+      
+      // Create the BasemapGallery widget with valid basemaps
+      const basemapGallery = new BasemapGallery({
+        view: view,
+        source: [
+          Basemap.fromId("topo-vector"), // Topographic
+          Basemap.fromId("streets-navigation-vector"), // Streets Navigation
+          Basemap.fromId("streets-vector") // Streets
+        ] 
+      });
+
+      // Handle any errors
+      view.when(() => {
+        basemapGallery.source.basemaps.forEach(basemap => {
+          basemap.load().then(() => {
+            console.log(basemap.title + " loaded successfully");
+          }).catch(err => {
+            console.error("Failed to load basemap: " + basemap.title, err);
+          });
+        });
+      });
+
+      // Create an Expand widget to hold the BasemapGallery
+      const bgExpand = new Expand({
+        view: view,
+        content: basemapGallery,
+        expandIconClass: "esri-icon-basemap"
+      });
+
+      // Add the Expand widget to the top-right corner of the view
+      view.ui.add(bgExpand, "top-right");
+
+
+      // set up airport icon
+      const airportRenderer = {
+        "type": "simple",
+        "symbol": {
+          "type": "picture-marker",
+          "url": "local_airport_24dp_5F6368.png",
+          "width": "18px",
+          "height": "18px"
+        }
+      };
+
+
+
+      // Add the graphicsLayer
+      const graphicsLayer = new GraphicsLayer();  
+      map.add(graphicsLayer);
+
+      
+
+      // Define the point symbol
+      const simpleMarkerSymbol = {  
+        type: "simple-marker",  
+        style: "diamond", 
+        color: [20, 90, 50],
+        outline: {  
+          color: [247, 220, 111], 
+          width: 1
+        }
+      };
+
+      // Define the point geometry
+      const point = { 
+        type: "point",  
+        longitude: -88.062317,
+        latitude: 44.501308
+      };
+
+      const popupTemplate = {
+        title: "{Name}",
+        content: "{Description}"
+      };
+
+      const attributes = {
+        Name: "Lambeau Field, Green Bay, WI",
+        Description: "The Frozen Tundra"
+      };
+
+      const pointGraphic = new Graphic({  
+        geometry: point,  
+        symbol: simpleMarkerSymbol,
+        attributes: attributes,
+        popupTemplate: popupTemplate
+      });
+
+      graphicsLayer.add(pointGraphic);
+
+      // Define the polygon geometry
+      const polygon = {
+        type: "polygon",
+        rings: [
+          [-88.0634, 44.5036],
+          [-88.0654, 44.5005],
+          [-88.0591, 44.4987],
+          [-88.0572, 44.5015]
+        ]
+      };
+
+      // Define the polygon symbol
+      const fillSymbol = {
+        type: "simple-fill",
+        color: [51, 204, 51, 0.25], 
+        outline: {
+          color: [0, 0, 0],
+          width: 1
+        }
+      };
+
+      // Create the polygon graphic and add it to graphicsLayer
+      const polygonGraphic = new Graphic({
+        geometry: polygon,
+        symbol: fillSymbol
+      });
+
+      graphicsLayer.add(polygonGraphic);
+
+      // Define the polyline geometry
+      const polyline = {
+        type: "polyline",
+        paths: [
+          [-88.045136, 44.496216],
+          [-88.044579, 44.497364],
+          [-88.056895, 44.501618]
+        ]
+      };
+
+      // Define the polyline symbol
+      const lineSymbol = {
+        type: "simple-line",
+        color: [226, 119, 40], 
+        width: 2
+      };
+
+      // Create the polyline graphic and add it to graphicsLayer
+      const polylineGraphic = new Graphic({
+        geometry: polyline,
+        symbol: lineSymbol
+      });
+
+      graphicsLayer.add(polylineGraphic);
+
+      // Define the popup for usaeduLayer
+      const popupEduusa = {
+        title: "{INSTNM}",
+        content: `
+          <b>Address:</b> {ADDR}, {CITY}, {STABBR} {ZIP}<br>
+          <b>Total Enrollment:</b> {C21ENPRF}<br>
+          <b>Website:</b> <a href="{WEBADDR}" target="_blank">{WEBADDR}</a>
+        `
+      };
+
+      // Create the feature layer for colleges and universities
+      const usaeduLayer = new FeatureLayer({
+        url: "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Colleges_and_Universities_View/FeatureServer",
+        outFields: ["INSTNM", "ADDR", "CITY", "STABBR", "ZIP", "C21ENPRF", "WEBADDR"],
+        popupTemplate: popupEduusa
+      });
+
+
+      // Add the feature layer to the map
+      map.add(usaeduLayer);
+
+      //const to make the airport labels
+      const airportLabels = {
+        symbol: {
+      type: "text",
+      color: "#FFFFFF",
+      haloColor: "#5E8D74",
+      haloSize: "2px",
+      font: {
+        size: "12px",
+        family: "Noto Sans",
+        style: "italic",
+        weight: "normal"
+      }
+      },
+      labelPlacement: "above-center",
+      labelExpressionInfo: {
+      expression: "$feature.Fac_Name"
+      }
+      };
+
+      // Create the airport feature layer
+      const airport = new FeatureLayer({
+        url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/NS_US_Airports/FeatureServer",
+        renderer: airportRenderer,
+        definitionExpression: "Fac_Type = 'AIRPORT'", //adding sql to filter for airports
+        labelingInfo: [airportLabels] //adding the labels
+      });
+
+      // Add event listener for layer loading
+      airport.when(() => {
+        console.log("Airport layer loaded");
+      }).catch(err => {
+        console.error("Error loading airport layer: ", err);
+      });
+
+      // Add the airport feature layer to the map
+      map.add(airport);
+
+
+
+      // Define the myAirports labels
+      const myAirportsLabel = {
+        symbol: {
+          type: "text",
+          color: "#FFFFFF",
+          haloColor: "#5E8D74",
+          haloSize: "2px",
+          font: {
+            size: "12px",
+            family: "Noto Sans",
+            style: "italic",
+            weight: "normal"
+      }
+      },
+        labelPlacement: "below-center",
+        labelExpressionInfo: {
+          expression: "$feature.Fac_Name"
+      }
+      };
+
+      // Create the myAirports feature layer
+      const myAirports = new FeatureLayer({
+        url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Airports_I_have_Been_To/FeatureServer",
+        outFields: ["AirportCode"],
+        labelingInfo: [myAirportsLabel] //adding the labels
+      });
+        //adding the feature layer to the map
+      map.add(myAirports);
+
+
+      // Set the point layer's LayerInfo
+      const pointInfos = {
+        layer: myAirports
+      }
+
+      // Begin Editor constructor
+      const editor = new Editor({
+        view: view,
+        layerInfos: [pointInfos]
+      }); // End Editor constructor
+
+      // Add the widget to the view
+      view.ui.add(editor, "top-right");
+
+
+        // Create the Legend widget
+      const legend = new Legend({
+        view: view
+      });
+
+      // Add the Legend widget to the bottom-right corner of the view
+      view.ui.add(legend, "bottom-right");
+
+
+
+      // Add the Locate widget
+      const locateWidget = new Locate({
+        view: view,
+        graphic: new Graphic({
+          symbol: {
+            type: "simple-marker",
+            style: "circle",
+            color: "blue",
+            size: "12px",
+            outline: {
+              color: "white",
+              width: "2px"
+            }
+          }
+        })
+      });
+
+      // Add the Locate widget to the top-left corner of the view
+      view.ui.add(locateWidget, "top-left");
+
+      // Create the Search widget
+      const searchWidget = new Search({
+        view: view
+      });
+
+      // Add the Search widget to the top-left corner of the view
+      view.ui.add(searchWidget, {
+        position: "top-left",
+        index: 0
+      });
+
+    });  
+   </script>
+
+  <!-- CSS to make a full screen app -->
+  <style>  
+    html,  
+    body,  
+    #viewDiv {  
+      padding: 0;  
+      margin: 0;  
+      height: 100%;  
+      width: 100%;  
+    }  
+  </style> 
+
+</head>
+
+<body>
+
+  <!-- The div to display the map -->
+  <div id="viewDiv"></div>  
+  
+
+</body>
+</html>
