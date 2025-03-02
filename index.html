@@ -30,13 +30,53 @@
     // API Key
     esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0diRtH-8-hTw6A4yGHgmVOJhCcHv3GopSAoouf_ZXKba27OVCBsUE0flwkQAelKDGVpRJ0uAzVakRFCy-FzhGqgmZGR12ZbZKArBFzawYx1LyxHf1pfp_2qoHS9H46m5UKIAtSrzvhjOGQLZwd4ULn0nb3ny9jdgp_VoUrx6jCHaNMwnpChDtsoOZ-3xNioHpAT1_vDdmvvAZ";
 
-    
-    
+    // Basemap Widget
+    const basemapGallery = new BasemapGallery({ view: view });
+
+    const bgExpand = new Expand({
+      view: view,
+      content: basemapGallery,
+      expandIconClass: "esri-icon-basemap"
+    });
+
+    // Add the Basemap widget to the top-right corner of the view
+    view.ui.add(bgExpand, "top-right");
+
+    // Search Widget
+    const searchWidget = new Search({
+      view: view
+    });
+
+    // Add the Search widget to the top-left corner of the view
+    view.ui.add(searchWidget, {
+      position: "top-left",
+      index: 0
+    });
+
+
+    const locateWidget = new Locate({
+      view: view,
+      graphic: new Graphic({
+        symbol: {
+          type: "simple-marker",
+          style: "circle",
+          color: "blue",
+          size: "12px",
+          outline: {
+            color: "white",
+            width: "2px"
+          }
+        }
+      })
+    });
+
+// Add the Locate widget to the bottom-left corner of the view
+view.ui.add(locateWidget, "bottom-left");
 
 
 
 
-    
+
    </script>
 
   <!-- CSS to make a full screen app -->
