@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="" />
 
-  <!-- calls for the ArcGIS API's CSS file and JS library -->
+  <!-- Calls for the ArcGIS API's CSS file and JS library -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.25/"></script>
 
@@ -26,68 +26,25 @@
       "esri/Graphic",
       "esri/Basemap"
     ], function (esriConfig, Map, MapView, FeatureLayer, BasemapGallery, Expand, Locate, Search, Legend, Editor, GraphicsLayer, Graphic, Basemap) {
-    });
 
-      // API Key
+      // Set the API Key
       esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0diRtH-8-hTw6A4yGHgmVOJhCcHv3GopSAoouf_ZXKba27OVCBsUE0flwkQAelKDGVpRJ0uAzVakRFCy-FzhGqgmZGR12ZbZKArBFzawYx1LyxHf1pfp_2qoHS9H46m5UKIAtSrzvhjOGQLZwd4ULn0nb3ny9jdgp_VoUrx6jCHaNMwnpChDtsoOZ-3xNioHpAT1_vDdmvvAZ";
 
-    const map = new Map({ basemap: "topo-vector" });
+      // Create the map
+      const map = new Map({
+        basemap: "arcgis-topographic"
+      });
 
+      // Create the view
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-89.4, 43.08], // Wisconsin coordinates
+        zoom: 7
+      });
 
-    const view = new MapView({
-      container: "viewDiv",
-      map: map,
-      center: [-89.4, 43.08], // Wisconsin coordinates
-      zoom: 7
-    });
-
-
-    // Basemap Widget
-    const basemapGallery = new BasemapGallery({ view: view });
-
-    const bgExpand = new Expand({
-      view: view,
-      content: basemapGallery,
-      expandIconClass: "esri-icon-basemap"
-    });
-
-    // Add the Basemap widget to the top-right corner of the view
-    view.ui.add(bgExpand, "top-right");
-
-    // Search Widget
-    const searchWidget = new Search({
-      view: view
-    });
-
-    // Add the Search widget to the top-left corner of the view
-    view.ui.add(searchWidget, {
-      position: "top-left",
-      index: 0
-    });
-
-
-    const locateWidget = new Locate({
-      view: view,
-      graphic: new Graphic({
-        symbol: {
-          type: "simple-marker",
-          style: "circle",
-          color: "blue",
-          size: "12px",
-          outline: {
-            color: "white",
-            width: "2px"
-          }
-        }
-      })
-    });
-
-    // Add the Locate widget to the bottom-left corner of the view
-    view.ui.add(locateWidget, "bottom-left");
-
-
-    // Add the GeoJSON FeatureLayer
-    const lakeLayer = new FeatureLayer({
+      // Add the GeoJSON FeatureLayer
+      const lakeLayer = new FeatureLayer({
         url: "https://dnrmaps.wi.gov/arcgis/rest/services/WT_SWDV/WT_Condition_Assessments_WTM_Ext/MapServer/8",
         outFields: ["*"],
         popupTemplate: {
@@ -100,28 +57,55 @@
       });
       map.add(lakeLayer);
 
+      // Basemap Widget
+      const basemapGallery = new BasemapGallery({ view: view });
+      const bgExpand = new Expand({
+        view: view,
+        content: basemapGallery,
+        expandIconClass: "esri-icon-basemap"
+      });
+      view.ui.add(bgExpand, "top-right");
 
-   </script>
+      // Search Widget
+      const searchWidget = new Search({
+        view: view
+      });
+      view.ui.add(searchWidget, {
+        position: "top-left",
+        index: 0
+      });
 
-  <!-- CSS to make a full screen app -->
-  <style>  
-    html,  
-    body,  
-    #viewDiv {  
-      padding: 0;  
-      margin: 0;  
-      height: 100%;  
-      width: 100%;  
-    }  
-  </style> 
+      // Locate Widget
+      const locateWidget = new Locate({
+        view: view,
+        graphic: new Graphic({
+          symbol: {
+            type: "simple-marker",
+            style: "circle",
+            color: "blue",
+            size: "12px",
+            outline: {
+              color: "white",
+              width: "2px"
+            }
+          }
+        })
+      });
+      view.ui.add(locateWidget, "bottom-left");
+    });
+  </script>
 
+  <!-- CSS to make a full-screen app -->
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
 </head>
-
 <body>
-
-  <!-- The div to display the map -->
-  <div id="viewDiv"></div>  
-  
-
+  <div id="viewDiv"></div>
 </body>
 </html>
