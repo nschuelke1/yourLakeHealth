@@ -90,6 +90,22 @@
       // Add the layer to the map
       map.add(lakeLayer);
 
+      // Add custom title
+      const titleDiv = document.createElement("div");
+      titleDiv.innerHTML = "Your Lake Health";
+      titleDiv.style.padding = "10px";
+      titleDiv.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+      titleDiv.style.fontSize = "18px";
+      titleDiv.style.fontWeight = "bold";
+      titleDiv.style.color = "#2b6cb0";
+      titleDiv.style.borderRadius = "5px";
+
+      // Add title to top-left corner
+      view.ui.add(titleDiv, {
+        position: "top-left",
+        index: 0 // Ensures it appears above the search bar
+        });
+
       // Basemap Widget
       const basemapGallery = new BasemapGallery({ view: view });
       const bgExpand = new Expand({
@@ -103,7 +119,7 @@
       const searchWidget = new Search({ view: view });
       view.ui.add(searchWidget, {
         position: "top-left",
-        index: 0
+        index: 1
       });
 
       // Locate Widget
