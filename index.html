@@ -20,12 +20,8 @@
       "esri/widgets/Expand",
       "esri/widgets/Locate",
       "esri/widgets/Search",
-      "esri/widgets/Legend",
-      "esri/widgets/Editor",
-      "esri/layers/GraphicsLayer",
-      "esri/Graphic",
-      "esri/Basemap"
-    ], function (esriConfig, Map, MapView, FeatureLayer, BasemapGallery, Expand, Locate, Search, Legend, Editor, GraphicsLayer, Graphic, Basemap) {
+      "esri/widgets/Legend"
+    ], function (esriConfig, Map, MapView, FeatureLayer, BasemapGallery, Expand, Locate, Search, Legend) {
 
       // Set the API Key
       esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurA_2jA8sPPf_DuV7jRLl5PwtnXSU0EiBd11SD4M-Bxw0fKFGrTZCu3NOyovbJDBfzSkqhGX7Epe-UyqIiCsaaRjTZSsoKmR9S9GfDKY2gyLmWOnU_crh2vn7GmcQjYfCaI7_1l5pJln7ETdNuu-9vzQ7RgW_pV6rBHV5OcYikJqFRy0xgRwWuWQpLx2hMKRt8EHSo6a8c4SjR8zBRbLPfojgG7n9be409OOnbaATrJmUAT1_g4uWkXaW";
@@ -43,10 +39,10 @@
         zoom: 7.5
       });
 
-      // Add the GeoJSON FeatureLayer
+      // Add the GeoJSON FeatureLayer with labeling and renderer
       const lakeLayer = new FeatureLayer({
         url: "https://dnrmaps.wi.gov/arcgis/rest/services/WT_SWDV/WT_Condition_Assessments_WTM_Ext/MapServer/8",
-        outFields: ["*"],
+        outFields: ["*"], // Load all attributes
         popupTemplate: {
           title: "{WATERBODY_NAME}", // Lake name
           content: `
@@ -54,29 +50,45 @@
             <b>Pollutant:</b> {IMPAIRED_WATER_POLLUTANT} <br>
             <b>DNR Category:</b> {DNR_CATEGORY} <br>
             <b>Aquatic Invasives:</b> {AQUATIC_INVASIVES} <br>
-            `
-          },
-  
+          `
+        },
         renderer: {
           type: "simple", // SimpleRenderer
           symbol: {
             type: "simple-fill", // Polygon symbol
-            color: [173, 216, 230, 0.5], // Light blue, 50% transparent (R,G,B,Alpha)
+            color: [173, 216, 230, 0.75], // Light blue with 75% transparency
             outline: {
-              color: [0, 0, 255], // Blue outline
+              color: [0, 0, 255, 0.5], // Blue outline with transparency
               width: 1 // Outline width in pixels
-        }
-        }
+            }
+          }
         },
+        labelingInfo: [
+          {
+            symbol: {
+              type: "text", // Text symbol for labeling
+              color: "blue", // Text color
+              haloColor: "white", // Halo (outline) color
+              haloSize: "1px", // Halo (outline) size
+              font: {
+                size: 12, // Font size in points
+                family: "Arial",
+                weight: "bold"
+              }
+            },
+            labelPlacement: "center-center", // Place labels at the center of the lake polygon
+            labelExpressionInfo: {
+              expression: "$feature.WATERBODY_NAME" // Display the lake name
+            },
+            minScale: 2000000 // Labels appear when zoomed closer than 1:2,000,000
+          }
+        ],
         minScale: 5000000, // Show lakes when zoomed closer than 1:5,000,000
         maxScale: 0        // Visible at all smaller scales (zoomed in)
-        });
+      });
 
-
-
-
-map.add(lakeLayer);
-
+      // Add the layer to the map
+      map.add(lakeLayer);
 
       // Basemap Widget
       const basemapGallery = new BasemapGallery({ view: view });
@@ -88,31 +100,20 @@ map.add(lakeLayer);
       view.ui.add(bgExpand, "top-right");
 
       // Search Widget
-      const searchWidget = new Search({
-        view: view
-      });
+      const searchWidget = new Search({ view: view });
       view.ui.add(searchWidget, {
         position: "top-left",
         index: 0
       });
 
       // Locate Widget
-      const locateWidget = new Locate({
-        view: view,
-        graphic: new Graphic({
-          symbol: {
-            type: "simple-marker",
-            style: "circle",
-            color: "blue",
-            size: "12px",
-            outline: {
-              color: "white",
-              width: "2px"
-            }
-          }
-        })
-      });
+      const locateWidget = new Locate({ view: view });
       view.ui.add(locateWidget, "bottom-left");
+
+      // Legend Widget
+      const legend = new Legend({ view: view });
+      view.ui.add(legend, "bottom-right");
+
     });
   </script>
 
