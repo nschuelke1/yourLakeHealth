@@ -39,8 +39,8 @@
       const view = new MapView({
         container: "viewDiv",
         map: map,
-        center: [-89.4, 43.08], // Wisconsin coordinates
-        zoom: 7
+        center: [-89.4, 45.08], // Wisconsin coordinates
+        zoom: 7.5
       });
 
       // Add the GeoJSON FeatureLayer
@@ -50,12 +50,33 @@
         popupTemplate: {
           title: "{WATERBODY_NAME}", // Lake name
           content: `
-            <b>Description:</b> {DESCRIPTION} <br>
-            <b>Area:</b> {AREA} sq km
-          `
+            <b>Water Category:</b> {IMPAIRED_WATER_CATEGORY} <br>
+            <b>Pollutant:</b> {IMPAIRED_WATER_POLLUTANT} <br>
+            <b>DNR Category:</b> {DNR_CATEGORY} <br>
+            <b>Aquatic Invasives:</b> {AQUATIC_INVASIVES} <br>
+            `
+          },
+  
+        renderer: {
+          type: "simple", // SimpleRenderer
+          symbol: {
+            type: "simple-fill", // Polygon symbol
+            color: [173, 216, 230, 0.5], // Light blue, 50% transparent (R,G,B,Alpha)
+            outline: {
+              color: [0, 0, 255], // Blue outline
+              width: 1 // Outline width in pixels
         }
-      });
-      map.add(lakeLayer);
+        }
+        },
+        minScale: 5000000, // Show lakes when zoomed closer than 1:5,000,000
+        maxScale: 0        // Visible at all smaller scales (zoomed in)
+        });
+
+
+
+
+map.add(lakeLayer);
+
 
       // Basemap Widget
       const basemapGallery = new BasemapGallery({ view: view });
