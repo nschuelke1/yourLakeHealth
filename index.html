@@ -35,9 +35,22 @@
       const view = new MapView({
         container: "viewDiv",
         map: map,
-        center: [-89.4, 45.08], // Wisconsin coordinates
-        zoom: 7.5
+        center: [-89.4, 44.5], // Center of Wisconsin
+        zoom: 7.5,
+        constraints: {
+          geometry: {
+            type: "extent",
+            xmin: -92.889, // Western boundary
+            ymin: 42.491, // Southern boundary
+            xmax: -86.249, // Eastern boundary
+            ymax: 47.080, // Northern boundary
+            spatialReference: { wkid: 4326 }
+          },
+          minScale: 30000000, // Minimum scale (zoomed out)
+          maxScale: 50000 // Maximum scale (zoomed in)
+        }
       });
+
 
       // Add the GeoJSON FeatureLayer with labeling and renderer
       const lakeLayer = new FeatureLayer({
