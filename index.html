@@ -11,6 +11,17 @@
   <script src="https://js.arcgis.com/4.25/"></script>
 
   <script>
+
+    //Creates popup of information about map when first loading webpage
+    window.onload = function() {
+      //Timeout lets the whole page loads before popup appears
+      setTimeout(function() {
+        alert("This is a test\n" + 
+              "Put some information about the map here\n" +
+              "Maybe information about what each attribute in the popup is describing");
+      }, 2000);
+    }
+
     require([
       "esri/config",
       "esri/Map",
